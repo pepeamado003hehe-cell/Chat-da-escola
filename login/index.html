@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Login Chat</title>
+    <link rel="icon" href="Chat-Icon.png" type="image/png" id="icon">
+
+    <style>
+        img {
+            width: 400px;
+            height: auto;
+
+        }
+
+        body {
+            font-family: Arial;
+            background: #1e1e1e;
+            color: white;
+            text-align: center;
+        }
+
+        #chat {
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border: 1px solid #444;
+        }
+
+        .msg {
+            max-width: 60%;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 10px;
+        }
+
+        .eu {
+            align-self: flex-end;
+            background: #4caf50;
+        }
+
+        .outro {
+            align-self: flex-start;
+            background: #333;
+        }
+
+        input {
+            margin-top: 10px;
+            padding: 8px;
+            height: 65px;
+            width: 250px;
+            font-size: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 45px rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            width: 85px;
+            height: 50px;
+            font-size: 25px;
+            border-radius: 15px;
+            border: #1e1e1e;
+        }
+    </style>
+</head>
+
+<body>
+    <br>
+    <br>
+    <br>
+    <input placeholder="Nome" id="Nametext">
+    <br>
+    <br>
+    <button onclick="Entrar()">Entrar</button>
+
+    <script>
+        let Nameexisting = localStorage.getItem("Chatname")
+
+        if (Nameexisting) {
+            window.location.href = "/Chat-da-escola";
+        }
+
+
+
+        function Entrar() {
+            let Nametext = document.getElementById('Nametext').value;
+
+            if (Nametext != "") {
+                localStorage.setItem("Chatname", Nametext)
+                window.location.href = "/Chat-da-escola";
+            } else {
+                alert("Não tem nome ai bru")
+            }
+        }
+    </script>
+</body>
+
+</html>
