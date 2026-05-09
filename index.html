@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title id="title">Pepe Chat</title>
+    <link rel="icon" href="Chat-Icon.png" type="image/png" id="icon">
+
+    <style>
+        img {
+            width: 400px;
+            height: auto;
+
+        }
+
+        body {
+            font-family: Arial;
+            background: #1e1e1e;
+            color: white;
+        }
+
+        #chat {
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border: 1px solid #444;
+        }
+
+        .msg {
+            max-width: 60%;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 10px;
+        }
+
+        .eu {
+            align-self: flex-end;
+            background: #4caf50;
+        }
+
+        .outro {
+            align-self: flex-start;
+            background: #333;
+        }
+
+        input {
+            margin-top: 10px;
+            padding: 8px;
+        }
+
+        button {
+            border-radius: 8px;
+        }
+
+        #chat {
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border: 1px solid #444;
+            background: #1e1e1e;
+
+            /* MODIFICAÇÕES AQUI: */
+            border-radius: 15px;
+            margin: 20px 0;
+            /* Dá espaço para a sombra aparecer nas bordas */
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.3);
+            /* Brilho leve branco */
+        }
+
+
+
+        /* CORREÇÃO DO SCROLLBAR */
+        #chat::-webkit-scrollbar {
+            width: 10px;
+
+
+        }
+
+        #chat::-webkit-scrollbar-track {
+            background: #1e1e1e;
+            /* Fundo preto */
+            border-radius: 10px;
+        }
+
+        #chat::-webkit-scrollbar-thumb {
+            background: gray;
+            /* Cor da barrinha */
+            border-radius: 10px;
+            border: 2px solid #1e1e1e;
+            /* Opcional: cria um espaçamento entre a barra e o fundo */
+        }
+
+        /* CORREÇÃO DO INPUT (Adicionado 'solid') */
+        input {
+            border-radius: 10px;
+            padding: 8px;
+            border: 2px solid rgb(184, 184, 184);
+            /* Faltava o 'solid' aqui */
+            background: #1e1e1e;
+            /* Opcional: fundo escuro para combinar com o tema */
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <img src="Simbolo.png" style="justify-content: center; display: flex;">
+    <br>
+
+    <p style="font-size: 25px;">Name: <span id="NameP"></span></p>
+    <input type="text" id="mensagem" placeholder="Mensagem">
+    <button onclick="enviar()">Enviar</button>
+    <br>
+    <br>
+
+    <p id="digitando" style="font-size: 14px; color: #4caf50; height: 20px;"></p>
+    <div id="chat"></div>
+
+    <br>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <button onclick="Esconder()" style="text-align: center;">Esconder Site</button>
+    </div>
+    <br>
+    <br>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+
+        let Nameexisting = localStorage.getItem("Chatname")
+        let nameP = document.getElementById('NameP')
+
+        if (Nameexisting) {
+            console.log("Tudo dboa no name")
+            nameP.innerText = Nameexisting;
+        } else {
+            window.location.href = "/Chat-da-escola/login";
+        }
+
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTRtUoWrrSQ6y4OKar2lje93SRG3bkkEQ",
+            authDomain: "site-topster.firebaseapp.com",
+            projectId: "site-topster",
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const chat = document.getElementById("chat");
+        const digitandoElemento = document.getElementById("digitando"); // Faltava definir aqui
+        const campoMensagem = document.getElementById("mensagem");    // Faltava definir aqui
+
+        // 1. Detectar foco
+        campoMensagem.addEventListener("focus", () => {
+            db.collection("status").doc(Nameexisting).set({ digitando: true });
+        });
+
+        // 2. Detectar quando sai do campo
+        campoMensagem.addEventListener("blur", () => {
+            db.collection("status").doc(Nameexisting).set({ digitando: false });
+        });
+
+        let Escondido = false;
+
+        function Esconder() {
+            let title = document.getElementById('title');
+            let icon = document.getElementById('icon');
+
+            if (Escondido === false) {
+                title.innerText = "Gov";
+                if (icon) icon.href = "Brasão.png";
+                Escondido = true;
+            } else {
+                title.innerText = "Pepe Chat";
+                if (icon) icon.href = "Chat-Icon.png";
+                Escondido = false;
+            }
+
+
+
+        }
+        // 3. Escutar mudanças (Corrigido para usar a variável definida)
+        db.collection("status").onSnapshot(snapshot => {
+            let quemEstaDigitando = [];
+            snapshot.forEach(doc => {
+                if (doc.id !== Nameexisting && doc.data().digitando) {
+                    quemEstaDigitando.push(doc.id);
+                }
+            });
+
+            if (quemEstaDigitando.length > 0) {
+                digitandoElemento.innerText = `${quemEstaDigitando.join(", ")} está digitando...`;
+            } else {
+                digitandoElemento.innerText = "";
+            }
+        });
+
+        function enviar() {
+            const nome = localStorage.getItem("Chatname").trim();
+
+            // 1. Mude para 'let' para permitir a troca do texto
+            let mensagem = document.getElementById("mensagem").value.trim();
+
+            if (!nome || !mensagem) return;
+
+            // 2. Agora a substituição funciona!
+            if (mensagem === ":D") {
+                mensagem = "😄";
+            }
+            if (mensagem === "<3") {
+                mensagem = "❤️";
+            }
+            if (mensagem === ":P") {
+                mensagem = "😝"
+            }
+
+            db.collection("mensagens").add({
+                nome,
+                texto: mensagem,
+                timestamp: Date.now()
+            });
+
+            document.getElementById("mensagem").value = "";
+        }
+
+        // ESCUTAR MENSAGENS
+        // ESCUTAR MENSAGENS
+        db.collection("mensagens")
+            .orderBy("timestamp")
+            .onSnapshot(snapshot => {
+                chat.innerHTML = "";
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const div = document.createElement("div");
+                    div.classList.add("msg");
+
+                    // CORREÇÃO: Usar a variável Nameexisting definida no topo do script
+                    if (data.nome === Nameexisting) {
+                        div.classList.add("eu");
+                    } else {
+                        div.classList.add("outro");
+                    }
+
+                    // Dica: Use strong para o nome ficar em destaque
+                    div.innerHTML = `<strong>${data.nome}:</strong> ${data.texto}`;
+                    chat.appendChild(div);
+                });
+
+                chat.scrollTop = chat.scrollHeight;
+            });
+
+
+        // enviar com Enter
+        document.getElementById("mensagem").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") enviar();
+        });
+    </script>
+
+</body>
+
+</html>
